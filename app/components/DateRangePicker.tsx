@@ -8,15 +8,10 @@ import Button from '@mui/material/Button'
 import { LocalizationProvider } from '@mui/x-date-pickers-pro'
 import { AdapterDayjs } from '@mui/x-date-pickers-pro/AdapterDayjs'
 import { StaticDateRangePicker } from '@mui/x-date-pickers-pro/StaticDateRangePicker'
-import { DesktopDateRangePicker } from '@mui/x-date-pickers-pro/DesktopDateRangePicker'
 import { DateRange } from '@mui/x-date-pickers-pro/DateRangePicker'
-import InputLabel from '@mui/material/InputLabel'
 import MenuItem from '@mui/material/MenuItem'
 import FormControl from '@mui/material/FormControl'
 import Select, { SelectChangeEvent } from '@mui/material/Select'
-
-var relativeTime = require('dayjs/plugin/relativeTime')
-dayjs.extend(relativeTime)
 
 import { LicenseInfo } from '@mui/x-license-pro'
 
@@ -77,7 +72,7 @@ const shortcuts = [
 
 export const DateRangePicker = ({ onSubmit, onClose }) => {
   const [values, setValues] = React.useState<DateRange<Dayjs>>([null, null])
-  const [showing, setShowing] = React.useState(1)
+  const [showing, setShowing] = React.useState<string>('1')
 
   React.useEffect(() => {
     const shortcut = shortcuts[showing]
@@ -98,33 +93,39 @@ export const DateRangePicker = ({ onSubmit, onClose }) => {
 
   return (
     <Box sx={{ p: 2, backgroundColor: '#23211F', borderRadius: '8px' }}>
-      <div className="flex items-center justify-between space-x-4">
-        <div>Showing</div>
-        <div className="flex-1">
-          <FormControl fullWidth>
-            <Select
-              labelId="demo-simple-select-label"
-              id="demo-simple-select"
+      <div className="flex items-center justify-between space-x-4 text-sm">
+        <div className="flex items-center space-x-4 w-1/2">
+          <div>Showing</div>
+          <div className="flex-1">
+            <select
+              className="bg-[#2E2C2A] border border-[#383634] rounded h-10 text-white w-full"
               value={showing}
-              displayEmpty
               onChange={handleChange}
             >
               {shortcuts.map((shortcut, i) => {
                 return (
-                  <MenuItem key={`shortcut${i}`} value={i}>
+                  <option key={`shortcut${i}`} value={`${i}`}>
                     {shortcut.label}
-                  </MenuItem>
+                  </option>
                 )
               })}
-            </Select>
-          </FormControl>
+            </select>
+          </div>
+        </div>
+
+        <div className="flex items-center space-x-4 w-1/2">
+          <div>With Date Range</div>
+          <div className="flex-1">
+            <div className="bg-[#2E2C2A] border border-[#383634] rounded h-10 flex items-center justify-center">
+              {values[0] && values[0].format('M/DD/YY')} - {values[1] && values[1].format('M/DD/YY')}
+            </div>
+          </div>
         </div>
       </div>
       <Stack spacing={3}>
-        <div className="block md:hidden">
-          <LocalizationProvider dateAdapter={AdapterDayjs} localeText={{ start: 'Mobile start', end: 'Mobile end' }}>
+        <LocalizationProvider dateAdapter={AdapterDayjs} localeText={{ start: 'Start Date', end: 'End Date' }}>
+          <div className="block md:hidden">
             <StaticDateRangePicker
-              displayStaticWrapperAs="mobile"
               value={values}
               onChange={(newValue) => {
                 setValues(newValue)
@@ -137,10 +138,8 @@ export const DateRangePicker = ({ onSubmit, onClose }) => {
                 </>
               )}
             />
-          </LocalizationProvider>
-        </div>
-        <div className="hidden md:block">
-          <LocalizationProvider dateAdapter={AdapterDayjs} localeText={{ start: 'Desktop start', end: 'Desktop end' }}>
+          </div>
+          <div className="hidden md:block">
             <StaticDateRangePicker
               displayStaticWrapperAs="desktop"
               value={values}
@@ -155,8 +154,8 @@ export const DateRangePicker = ({ onSubmit, onClose }) => {
                 </>
               )}
             />
-          </LocalizationProvider>
-        </div>
+          </div>
+        </LocalizationProvider>
       </Stack>
       <Stack direction="row" spacing={2} justifyContent="end" padding={2}>
         <Button variant="outlined" color="inherit" size="large" onClick={onClose}>

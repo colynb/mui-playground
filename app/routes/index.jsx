@@ -6,10 +6,18 @@ import { ThemeProvider, createTheme } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
 
 const darkTheme = createTheme({
+  components: {
+    MuiDateRangePicker: {
+      defaultProps: {
+        disabledRipple: true,
+      },
+    },
+  },
   palette: {
     mode: 'dark',
     primary: {
       main: '#20F2CF',
+      light: 'rgba(19, 99, 135, 0.66)',
     },
     white: {
       main: '#fff',

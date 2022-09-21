@@ -328,6 +328,18 @@ select {
   height: 100vh;
 }
 
+.h-10 {
+  height: 2.5rem;
+}
+
+.w-1\/2 {
+  width: 50%;
+}
+
+.w-full {
+  width: 100%;
+}
+
 .flex-1 {
   flex: 1 1 0%;
 }
@@ -362,6 +374,11 @@ select {
   border-width: 1px;
 }
 
+.border-\[\#383634\] {
+  --tw-border-opacity: 1;
+  border-color: rgb(56 54 52 / var(--tw-border-opacity));
+}
+
 .bg-black {
   --tw-bg-opacity: 1;
   background-color: rgb(0 0 0 / var(--tw-bg-opacity));
@@ -372,12 +389,22 @@ select {
   background-color: rgb(31 41 55 / var(--tw-bg-opacity));
 }
 
+.bg-\[\#2E2C2A\] {
+  --tw-bg-opacity: 1;
+  background-color: rgb(46 44 42 / var(--tw-bg-opacity));
+}
+
 .p-0 {
   padding: 0px;
 }
 
 .p-4 {
   padding: 1rem;
+}
+
+.text-sm {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
 }
 
 .text-white {
