@@ -41,19 +41,19 @@ const shortcuts = [
   {
     label: "Last 12 Months",
     dates: () => {
-      return [dayjs().startOf("month").subtract(12, "month"), dayjs()];
+      return [dayjs().subtract(12, "month"), dayjs()];
     },
   },
   {
     label: "Last 6 Months",
     dates: () => {
-      return [dayjs().startOf("month").subtract(6, "month"), dayjs()];
+      return [dayjs().subtract(6, "month"), dayjs()];
     },
   },
   {
     label: "Last 3 Months",
     dates: () => {
-      return [dayjs().startOf("month").subtract(3, "month"), dayjs()];
+      return [dayjs().subtract(3, "month"), dayjs()];
     },
   },
   {
@@ -79,9 +79,12 @@ export const DateRangePicker = ({ onSubmit, onClose }) => {
   React.useEffect(() => {
     const shortcut = shortcuts[showing];
     const dates = shortcut.dates();
-    setValues(dates);
-    setStartDate(dates[0]?.format("M/DD/YY"));
-    setEndDate(dates[1]?.format("M/DD/YY"));
+    if (startDate && endDate) {
+    } else {
+      setValues(dates);
+      setStartDate(dates[0]?.format("M/DD/YY"));
+      setEndDate(dates[1]?.format("M/DD/YY"));
+    }
   }, [showing]);
 
   const handleChange = (event: SelectChangeEvent) => {
@@ -100,6 +103,7 @@ export const DateRangePicker = ({ onSubmit, onClose }) => {
     const startDateDay = dayjs(startDate);
     const endDateDay = dayjs(endDate);
     if (startDateDay.isValid() && endDateDay.isValid()) {
+      setShowing("1");
       setValues([startDateDay, endDateDay]);
     }
   };
