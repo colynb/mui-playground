@@ -88,6 +88,8 @@ export const DateRangePicker = ({ onSubmit, onClose }) => {
   }, [showing]);
 
   const handleChange = (event: SelectChangeEvent) => {
+    setStartDate("");
+    setEndDate("");
     setShowing(event.target.value as string);
   };
 
