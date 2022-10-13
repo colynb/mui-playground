@@ -344,12 +344,16 @@ select {
   width: 5rem;
 }
 
+.w-40 {
+  width: 10rem;
+}
+
 .w-32 {
   width: 8rem;
 }
 
-.w-40 {
-  width: 10rem;
+.w-24 {
+  width: 6rem;
 }
 
 .max-w-2xl {
@@ -370,10 +374,6 @@ select {
 
 .justify-center {
   justify-content: center;
-}
-
-.justify-between {
-  justify-content: space-between;
 }
 
 .space-x-4 > :not([hidden]) ~ :not([hidden]) {
@@ -444,6 +444,10 @@ select {
 @media (min-width: 768px) {
   .md\:block {
     display: block;
+  }
+
+  .md\:flex {
+    display: flex;
   }
 
   .md\:hidden {

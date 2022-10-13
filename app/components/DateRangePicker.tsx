@@ -8,7 +8,10 @@ import Button from "@mui/material/Button";
 import { LocalizationProvider } from "@mui/x-date-pickers-pro";
 import { AdapterDayjs } from "@mui/x-date-pickers-pro/AdapterDayjs";
 import { StaticDateRangePicker } from "@mui/x-date-pickers-pro/StaticDateRangePicker";
-import { DateRange } from "@mui/x-date-pickers-pro/DateRangePicker";
+import {
+  DateRange,
+  DateRangePicker as DateRangePickerMUI,
+} from "@mui/x-date-pickers-pro/DateRangePicker";
 import { SelectChangeEvent } from "@mui/material/Select";
 
 import { LicenseInfo } from "@mui/x-license-pro";
@@ -258,82 +261,95 @@ export const DateRangePicker = ({ onSubmit, onClose }) => {
   };
 
   return (
-    <div className="p-4 bg-[#23211F] rounded-lg w-full max-w-2xl">
-      <div className="flex items-center space-x-4 text-sm">
-        <div className="flex items-center space-x-4">
-          <div>Showing</div>
-          <div className="flex-1">
-            <select
-              className="bg-[#2E2C2A] border border-[#383634] rounded h-10 text-white"
-              value={presetValue}
-              onChange={handlePresetChange}
-            >
-              <optgroup>
-                {presets.map((preset, i) => {
-                  return (
-                    <option key={`preset${i}`} value={`${preset.key}`}>
-                      {preset.label}
-                    </option>
-                  );
-                })}
-              </optgroup>
-            </select>
-          </div>
-        </div>
-
-        {presetValue === "yearof" && (
-          <SelectYear value={year} setYear={setYear} />
-        )}
-
-        {presetValue === "monthof" && (
-          <>
-            <SelectMonth value={month} setMonth={setMonth} />
-            <SelectYear value={year} setYear={setYear} />
-          </>
-        )}
-
-        {presetValue === "quarterof" && (
-          <>
-            <SelectQuarter value={quarter} setQuarter={setQuarter} />
-            <SelectYear value={year} setYear={setYear} />
-          </>
-        )}
-
-        {showingTemplate === "daterange" && (
-          <div className="flex items-center space-x-4 w-1/2">
-            <div>With Date Range</div>
+    <LocalizationProvider
+      dateAdapter={AdapterDayjs}
+      localeText={{ start: "Start Date", end: "End Date" }}
+    >
+      <div className="p-4 bg-[#23211F] rounded-lg w-full max-w-2xl">
+        <div className="md:flex items-center md:  space-x-4 text-sm">
+          <div className="flex items-center space-x-4">
+            <div>Showing</div>
             <div className="flex-1">
-              <div className="bg-[#2E2C2A] border border-[#383634] rounded h-10 flex items-center justify-center">
-                <input
-                  type="text"
-                  onChange={(e) => setStartDate(e.target.value)}
-                  onBlur={handleDateInput}
-                  value={startDate}
-                  className="bg-[#2E2C2A] w-20 text-white text-sm border-0"
-                />
-                <span>-</span>
-                <input
-                  type="text"
-                  onChange={(e) => setEndDate(e.target.value)}
-                  onBlur={handleDateInput}
-                  value={endDate}
-                  className="bg-[#2E2C2A] w-20 text-white text-sm border-0"
-                />
-              </div>
+              <select
+                className="bg-[#2E2C2A] border border-[#383634] rounded h-10 text-white"
+                value={presetValue}
+                onChange={handlePresetChange}
+              >
+                <optgroup>
+                  {presets.map((preset, i) => {
+                    return (
+                      <option key={`preset${i}`} value={`${preset.key}`}>
+                        {preset.label}
+                      </option>
+                    );
+                  })}
+                </optgroup>
+              </select>
             </div>
           </div>
-        )}
-      </div>
 
-      {showingTemplate === "daterange" && (
-        <Stack spacing={3}>
-          <LocalizationProvider
-            dateAdapter={AdapterDayjs}
-            localeText={{ start: "Start Date", end: "End Date" }}
-          >
+          {presetValue === "yearof" && (
+            <SelectYear value={year} setYear={setYear} />
+          )}
+
+          {presetValue === "monthof" && (
+            <>
+              <SelectMonth value={month} setMonth={setMonth} />
+              <SelectYear value={year} setYear={setYear} />
+            </>
+          )}
+
+          {presetValue === "quarterof" && (
+            <>
+              <SelectQuarter value={quarter} setQuarter={setQuarter} />
+              <SelectYear value={year} setYear={setYear} />
+            </>
+          )}
+
+          {showingTemplate === "daterange" && (
+            <div className="flex items-center space-x-4 w-1/2">
+              <div>With Date Range</div>
+              <div className="flex-1">
+                <div className="bg-[#2E2C2A] border border-[#383634] rounded h-10 flex items-center justify-center">
+                  <DateRangePickerMUI
+                    value={values}
+                    disableOpenPicker={true}
+                    onChange={(newValue) => {
+                      setValues(newValue);
+                      setStartDate(newValue[0]?.format("M/DD/YY"));
+                      setEndDate(newValue[1]?.format("M/DD/YY"));
+                    }}
+                    renderInput={(startProps, endProps) => (
+                      <React.Fragment>
+                        <input
+                          className="bg-[#2E2C2A] w-24 text-white text-sm border-0"
+                          ref={
+                            startProps.inputRef as React.Ref<HTMLInputElement>
+                          }
+                          {...startProps.inputProps}
+                        />
+                        <Box sx={{ mx: 1 }}> - </Box>
+                        <input
+                          className="bg-[#2E2C2A] w-24 text-white text-sm border-0"
+                          ref={endProps.inputRef as React.Ref<HTMLInputElement>}
+                          {...endProps.inputProps}
+                        />
+                      </React.Fragment>
+                    )}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {showingTemplate === "daterange" && (
+          <Stack spacing={3}>
             <div className="block md:hidden">
               <StaticDateRangePicker
+                displayStaticWrapperAs="desktop"
                 value={values}
+                calendars={1}
                 onChange={(newValue) => {
                   setValues(newValue);
                   setStartDate(newValue[0]?.format("M/DD/YY"));
@@ -366,30 +382,30 @@ export const DateRangePicker = ({ onSubmit, onClose }) => {
                 )}
               />
             </div>
-          </LocalizationProvider>
+          </Stack>
+        )}
+
+        <Stack direction="row" spacing={2} justifyContent="end" padding={2}>
+          <Button
+            variant="outlined"
+            color="inherit"
+            size="large"
+            onClick={onClose}
+          >
+            Cancel
+          </Button>
+
+          <Button
+            variant="contained"
+            color="primary"
+            size="large"
+            onClick={handleSubmit}
+            disabled={isDisabled()}
+          >
+            Apply
+          </Button>
         </Stack>
-      )}
-
-      <Stack direction="row" spacing={2} justifyContent="end" padding={2}>
-        <Button
-          variant="outlined"
-          color="inherit"
-          size="large"
-          onClick={onClose}
-        >
-          Cancel
-        </Button>
-
-        <Button
-          variant="contained"
-          color="primary"
-          size="large"
-          onClick={handleSubmit}
-          disabled={isDisabled()}
-        >
-          Apply
-        </Button>
-      </Stack>
-    </div>
+      </div>
+    </LocalizationProvider>
   );
 };
