@@ -1,5 +1,6 @@
 import * as React from "react";
 import dayjs, { Dayjs } from "dayjs";
+
 import TextField from "@mui/material/TextField";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
@@ -8,11 +9,12 @@ import { LocalizationProvider } from "@mui/x-date-pickers-pro";
 import { AdapterDayjs } from "@mui/x-date-pickers-pro/AdapterDayjs";
 import { StaticDateRangePicker } from "@mui/x-date-pickers-pro/StaticDateRangePicker";
 import { DateRange } from "@mui/x-date-pickers-pro/DateRangePicker";
-import MenuItem from "@mui/material/MenuItem";
-import FormControl from "@mui/material/FormControl";
-import Select, { SelectChangeEvent } from "@mui/material/Select";
+import { SelectChangeEvent } from "@mui/material/Select";
 
 import { LicenseInfo } from "@mui/x-license-pro";
+import { SelectYear } from "./SelectYear";
+import { SelectMonth } from "./SelectMonth";
+import { SelectQuarter } from "./SelectQuarter";
 
 LicenseInfo.setLicenseKey(
   "7760fb8fc9685036a87cae6a7d52f104Tz01MDUxMyxFPTE2OTQyNzAyMzA1OTMsUz1wcm8sTE09c3Vic2NyaXB0aW9uLEtWPTI="
@@ -98,15 +100,7 @@ const presets = [
     key: "monthof",
     template: "select",
   },
-  {
-    label: "Day of...",
-    key: "dayof",
-    template: "select",
-  },
 ];
-
-const years = (start, stop, step) =>
-  Array.from({ length: (stop - start) / step + 1 }, (_, i) => start + i * step);
 
 export const DateRangePicker = ({ onSubmit, onClose }) => {
   const [values, setValues] = React.useState<DateRange<Dayjs>>([null, null]);
@@ -116,6 +110,8 @@ export const DateRangePicker = ({ onSubmit, onClose }) => {
   const [startDate, setStartDate] = React.useState<string>("");
   const [endDate, setEndDate] = React.useState<string>("");
   const [year, setYear] = React.useState(new Date().getFullYear());
+  const [month, setMonth] = React.useState(new Date().getMonth());
+  const [quarter, setQuarter] = React.useState("Q1");
   const [selected, setSelected] = React.useState(null);
 
   React.useEffect(() => {
@@ -144,29 +140,106 @@ export const DateRangePicker = ({ onSubmit, onClose }) => {
   };
 
   const handleSubmit = () => {
-
-    if (presetValue === 'yearof') {
+    if (presetValue === "yearof") {
       onSubmit({
         label: `Date: Year of ${year}`,
         preset: presetValue,
-        value: year
+        value: year,
       });
 
       return;
     }
 
+    if (presetValue === "monthof") {
+      onSubmit({
+        label: `Date: ${month}, ${year}`,
+        preset: presetValue,
+        value: `${month}/${year}`,
+      });
+
+      return;
+    }
+
+    if (presetValue === "quarterof") {
+      onSubmit({
+        label: `Date: ${quarter} of ${year}`,
+        preset: presetValue,
+        value: `${quarter}/${year}`,
+      });
+
+      return;
+    }
+
+    if (presetValue === "yeartodate") {
+      onSubmit({
+        label: `Date: Year to Date`,
+        preset: presetValue,
+        value: values,
+      });
+
+      return;
+    }
+
+    if (presetValue === "last12months") {
+      onSubmit({
+        label: `Date: Last 12 Months`,
+        preset: presetValue,
+        value: values,
+      });
+
+      return;
+    }
+
+    if (presetValue === "last6months") {
+      onSubmit({
+        label: `Date: Last 6 Months`,
+        preset: presetValue,
+        value: values,
+      });
+
+      return;
+    }
+
+    if (presetValue === "last3months") {
+      onSubmit({
+        label: `Date: Last 3 Months`,
+        preset: presetValue,
+        value: values,
+      });
+
+      return;
+    }
+
+    if (presetValue === "thismonth") {
+      onSubmit({
+        label: `Date: This Month`,
+        preset: presetValue,
+        value: values,
+      });
+
+      return;
+    }
+
+    if (presetValue === "thisweek") {
+      onSubmit({
+        label: `Date: This Week`,
+        preset: presetValue,
+        value: values,
+      });
+
+      return;
+    }
     onSubmit({
       label: `Date: ${values[0].format("M/DD/YY")} - ${values[1].format(
         "M/DD/YY"
       )}`,
       preset: presetValue,
-      value: values
+      value: values,
     });
-
   };
 
   const isDisabled = () => {
-    return (!(values[0] && values[1]) && !year);
+    return !(values[0] && values[1]) && !year;
   };
 
   const handleDateInput = (e) => {
@@ -186,12 +259,12 @@ export const DateRangePicker = ({ onSubmit, onClose }) => {
 
   return (
     <div className="p-4 bg-[#23211F] rounded-lg w-full max-w-2xl">
-      <div className="flex items-center justify-between space-x-4 text-sm">
-        <div className="flex items-center space-x-4 w-1/2">
+      <div className="flex items-center space-x-4 text-sm">
+        <div className="flex items-center space-x-4">
           <div>Showing</div>
           <div className="flex-1">
             <select
-              className="bg-[#2E2C2A] border border-[#383634] rounded h-10 text-white w-full"
+              className="bg-[#2E2C2A] border border-[#383634] rounded h-10 text-white"
               value={presetValue}
               onChange={handlePresetChange}
             >
@@ -209,25 +282,21 @@ export const DateRangePicker = ({ onSubmit, onClose }) => {
         </div>
 
         {presetValue === "yearof" && (
-          <select
-            className="bg-[#2E2C2A] border border-[#383634] rounded h-10 text-white w-full"
-            value={year}
-            onChange={(e) => setYear(e.target.value)}
-          >
-            <optgroup>
-              {years(
-                new Date().getFullYear(),
-                new Date().getFullYear() - 50,
-                -1
-              ).map((year, i) => {
-                return (
-                  <option key={`year${year}`} value={`${year}`}>
-                    {year}
-                  </option>
-                );
-              })}
-            </optgroup>
-          </select>
+          <SelectYear value={year} setYear={setYear} />
+        )}
+
+        {presetValue === "monthof" && (
+          <>
+            <SelectMonth value={month} setMonth={setMonth} />
+            <SelectYear value={year} setYear={setYear} />
+          </>
+        )}
+
+        {presetValue === "quarterof" && (
+          <>
+            <SelectQuarter value={quarter} setQuarter={setQuarter} />
+            <SelectYear value={year} setYear={setYear} />
+          </>
         )}
 
         {showingTemplate === "daterange" && (
