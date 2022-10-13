@@ -29,14 +29,13 @@ const darkTheme = createTheme({
 export default function IndexRoute() {
   const [opened, setOpened] = useState(true)
   const [startDate, setStartDate] = useState(null)
+  const [selected, setSelected] = useState(null)
   const [endDate, setEndDate] = useState(null)
 
-  const handleSubmit = (values) => {
-    console.log({ values })
+  const handleSubmit = (selected) => {
     setOpened(false)
-
-    setStartDate(values[0])
-    setEndDate(values[1])
+    console.log({selected})
+    setSelected(selected)
   }
 
   const handleClose = (values) => {
@@ -48,8 +47,7 @@ export default function IndexRoute() {
       <CssBaseline />
       <div className="h-screen bg-black flex flex-col items-center justify-center m-0 p-0">
         <div className="flex space-x-4 bg-gray-800 rounded p-4">
-          {startDate && <div>{startDate.format('M/DD/YY')}</div>}
-          {endDate && <div>{endDate.format('M/DD/YY')}</div>}
+          {selected?.label}
         </div>
         <Button onClick={() => setOpened(true)}>Date Picker</Button>
         {opened && <DateRangePicker onSubmit={handleSubmit} onClose={handleClose} />}

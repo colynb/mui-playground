@@ -1,6 +1,5 @@
 import * as React from "react";
 import dayjs, { Dayjs } from "dayjs";
-
 import TextField from "@mui/material/TextField";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
@@ -19,184 +18,289 @@ LicenseInfo.setLicenseKey(
   "7760fb8fc9685036a87cae6a7d52f104Tz01MDUxMyxFPTE2OTQyNzAyMzA1OTMsUz1wcm8sTE09c3Vic2NyaXB0aW9uLEtWPTI="
 );
 
-const shortcuts = [
+const presets = [
   {
     label: "All Time",
+    key: "alltime",
+    template: "daterange",
     dates: () => {
       return [null, null];
     },
   },
   {
     label: "Custom",
+    key: "custom",
+    template: "daterange",
     dates: () => {
       return [null, null];
     },
   },
   {
     label: "Year to Date",
+    key: "yeartodate",
+    template: "daterange",
     dates: () => {
       return [dayjs("2022-01-01"), dayjs()];
     },
   },
   {
     label: "Last 12 Months",
+    key: "last12months",
+    template: "daterange",
     dates: () => {
       return [dayjs().subtract(12, "month"), dayjs()];
     },
   },
   {
     label: "Last 6 Months",
+    key: "last6months",
+    template: "daterange",
     dates: () => {
       return [dayjs().subtract(6, "month"), dayjs()];
     },
   },
   {
     label: "Last 3 Months",
+    key: "last3months",
+    template: "daterange",
     dates: () => {
       return [dayjs().subtract(3, "month"), dayjs()];
     },
   },
   {
     label: "This Month",
+    key: "thismonth",
+    template: "daterange",
     dates: () => {
       return [dayjs().startOf("month"), dayjs().endOf("month")];
     },
   },
   {
     label: "This Week",
+    key: "thisweek",
+    template: "daterange",
     dates: () => {
       return [dayjs().startOf("week"), dayjs().endOf("week")];
     },
   },
+  {
+    label: "Year of...",
+    key: "yearof",
+    template: "select",
+  },
+  {
+    label: "Quarter of...",
+    key: "quarterof",
+    template: "select",
+  },
+  {
+    label: "Month of...",
+    key: "monthof",
+    template: "select",
+  },
+  {
+    label: "Day of...",
+    key: "dayof",
+    template: "select",
+  },
 ];
+
+const years = (start, stop, step) =>
+  Array.from({ length: (stop - start) / step + 1 }, (_, i) => start + i * step);
 
 export const DateRangePicker = ({ onSubmit, onClose }) => {
   const [values, setValues] = React.useState<DateRange<Dayjs>>([null, null]);
-  const [showing, setShowing] = React.useState<string>("1");
+  const [presetValue, setPresetValue] = React.useState<string>("custom");
+  const [showingTemplate, setShowingTemplate] =
+    React.useState<string>("daterange");
   const [startDate, setStartDate] = React.useState<string>("");
   const [endDate, setEndDate] = React.useState<string>("");
+  const [year, setYear] = React.useState(new Date().getFullYear());
+  const [selected, setSelected] = React.useState(null);
 
   React.useEffect(() => {
-    const shortcut = shortcuts[showing];
-    const dates = shortcut.dates();
-    if (startDate && endDate) {
-    } else {
-      setValues(dates);
-      setStartDate(dates[0]?.format("M/DD/YY"));
-      setEndDate(dates[1]?.format("M/DD/YY"));
-    }
-  }, [showing]);
+    const preset = presets.find((p) => p.key === presetValue);
 
-  const handleChange = (event: SelectChangeEvent) => {
+    if (preset.template === "daterange") {
+      setShowingTemplate("daterange");
+      const dates = preset.dates();
+      if (startDate && endDate) {
+      } else {
+        setValues(dates);
+        setStartDate(dates[0]?.format("M/DD/YY"));
+        setEndDate(dates[1]?.format("M/DD/YY"));
+      }
+    }
+
+    if (preset.template === "select") {
+      setShowingTemplate("select");
+    }
+  }, [presetValue]);
+
+  const handlePresetChange = (event: SelectChangeEvent) => {
     setStartDate("");
     setEndDate("");
-    setShowing(event.target.value as string);
+    setPresetValue(event.target.value as string);
   };
 
   const handleSubmit = () => {
-    onSubmit(values);
+
+    if (presetValue === 'yearof') {
+      onSubmit({
+        label: `Date: Year of ${year}`,
+        preset: presetValue,
+        value: year
+      });
+
+      return;
+    }
+
+    onSubmit({
+      label: `Date: ${values[0].format("M/DD/YY")} - ${values[1].format(
+        "M/DD/YY"
+      )}`,
+      preset: presetValue,
+      value: values
+    });
+
   };
 
   const isDisabled = () => {
-    return !(values[0] && values[1]);
+    return (!(values[0] && values[1]) && !year);
   };
 
   const handleDateInput = (e) => {
     const startDateDay = dayjs(startDate);
     const endDateDay = dayjs(endDate);
     if (startDateDay.isValid() && endDateDay.isValid()) {
-      setShowing("1");
+      setPresetValue("custom");
       setValues([startDateDay, endDateDay]);
+    }
+
+    if (startDateDay.valueOf() > endDateDay.valueOf()) {
+      setValues(values);
+      setStartDate(values[0]?.format("M/DD/YY"));
+      setEndDate(values[1]?.format("M/DD/YY"));
     }
   };
 
   return (
-    <Box sx={{ p: 2, backgroundColor: "#23211F", borderRadius: "8px" }}>
+    <div className="p-4 bg-[#23211F] rounded-lg w-full max-w-2xl">
       <div className="flex items-center justify-between space-x-4 text-sm">
         <div className="flex items-center space-x-4 w-1/2">
           <div>Showing</div>
           <div className="flex-1">
             <select
               className="bg-[#2E2C2A] border border-[#383634] rounded h-10 text-white w-full"
-              value={showing}
-              onChange={handleChange}
+              value={presetValue}
+              onChange={handlePresetChange}
             >
-              {shortcuts.map((shortcut, i) => {
-                return (
-                  <option key={`shortcut${i}`} value={`${i}`}>
-                    {shortcut.label}
-                  </option>
-                );
-              })}
+              <optgroup>
+                {presets.map((preset, i) => {
+                  return (
+                    <option key={`preset${i}`} value={`${preset.key}`}>
+                      {preset.label}
+                    </option>
+                  );
+                })}
+              </optgroup>
             </select>
           </div>
         </div>
 
-        <div className="flex items-center space-x-4 w-1/2">
-          <div>With Date Range</div>
-          <div className="flex-1">
-            <div className="bg-[#2E2C2A] border border-[#383634] rounded h-10 flex items-center justify-center">
-              <input
-                type="text"
-                onChange={(e) => setStartDate(e.target.value)}
-                onBlur={handleDateInput}
-                value={startDate}
-                className="bg-[#2E2C2A] w-20 text-white text-sm border-0"
-              />
-              <span>-</span>
-              <input
-                type="text"
-                onChange={(e) => setEndDate(e.target.value)}
-                onBlur={handleDateInput}
-                value={endDate}
-                className="bg-[#2E2C2A] w-20 text-white text-sm border-0"
-              />
+        {presetValue === "yearof" && (
+          <select
+            className="bg-[#2E2C2A] border border-[#383634] rounded h-10 text-white w-full"
+            value={year}
+            onChange={(e) => setYear(e.target.value)}
+          >
+            <optgroup>
+              {years(
+                new Date().getFullYear(),
+                new Date().getFullYear() - 50,
+                -1
+              ).map((year, i) => {
+                return (
+                  <option key={`year${year}`} value={`${year}`}>
+                    {year}
+                  </option>
+                );
+              })}
+            </optgroup>
+          </select>
+        )}
+
+        {showingTemplate === "daterange" && (
+          <div className="flex items-center space-x-4 w-1/2">
+            <div>With Date Range</div>
+            <div className="flex-1">
+              <div className="bg-[#2E2C2A] border border-[#383634] rounded h-10 flex items-center justify-center">
+                <input
+                  type="text"
+                  onChange={(e) => setStartDate(e.target.value)}
+                  onBlur={handleDateInput}
+                  value={startDate}
+                  className="bg-[#2E2C2A] w-20 text-white text-sm border-0"
+                />
+                <span>-</span>
+                <input
+                  type="text"
+                  onChange={(e) => setEndDate(e.target.value)}
+                  onBlur={handleDateInput}
+                  value={endDate}
+                  className="bg-[#2E2C2A] w-20 text-white text-sm border-0"
+                />
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
-      <Stack spacing={3}>
-        <LocalizationProvider
-          dateAdapter={AdapterDayjs}
-          localeText={{ start: "Start Date", end: "End Date" }}
-        >
-          <div className="block md:hidden">
-            <StaticDateRangePicker
-              value={values}
-              onChange={(newValue) => {
-                setValues(newValue);
-                setStartDate(newValue[0]?.format("M/DD/YY"));
-                setEndDate(newValue[1]?.format("M/DD/YY"));
-              }}
-              renderInput={(startProps, endProps) => (
-                <>
-                  <TextField {...startProps} />
-                  <Box sx={{ mx: 2 }}> to </Box>
-                  <TextField {...endProps} />
-                </>
-              )}
-            />
-          </div>
-          <div className="hidden md:block">
-            <StaticDateRangePicker
-              displayStaticWrapperAs="desktop"
-              value={values}
-              onChange={(newValue) => {
-                setValues(newValue);
-                setStartDate(newValue[0]?.format("M/DD/YY"));
-                setEndDate(newValue[1]?.format("M/DD/YY"));
-              }}
-              renderInput={(startProps, endProps) => (
-                <>
-                  <TextField {...startProps} />
-                  <Box sx={{ mx: 2 }}> to </Box>
-                  <TextField {...endProps} />
-                </>
-              )}
-            />
-          </div>
-        </LocalizationProvider>
-      </Stack>
+
+      {showingTemplate === "daterange" && (
+        <Stack spacing={3}>
+          <LocalizationProvider
+            dateAdapter={AdapterDayjs}
+            localeText={{ start: "Start Date", end: "End Date" }}
+          >
+            <div className="block md:hidden">
+              <StaticDateRangePicker
+                value={values}
+                onChange={(newValue) => {
+                  setValues(newValue);
+                  setStartDate(newValue[0]?.format("M/DD/YY"));
+                  setEndDate(newValue[1]?.format("M/DD/YY"));
+                }}
+                renderInput={(startProps, endProps) => (
+                  <>
+                    <TextField {...startProps} />
+                    <Box sx={{ mx: 2 }}> to </Box>
+                    <TextField {...endProps} />
+                  </>
+                )}
+              />
+            </div>
+            <div className="hidden md:block">
+              <StaticDateRangePicker
+                displayStaticWrapperAs="desktop"
+                value={values}
+                onChange={(newValue) => {
+                  setValues(newValue);
+                  setStartDate(newValue[0]?.format("M/DD/YY"));
+                  setEndDate(newValue[1]?.format("M/DD/YY"));
+                }}
+                renderInput={(startProps, endProps) => (
+                  <>
+                    <TextField {...startProps} />
+                    <Box sx={{ mx: 2 }}> to </Box>
+                    <TextField {...endProps} />
+                  </>
+                )}
+              />
+            </div>
+          </LocalizationProvider>
+        </Stack>
+      )}
+
       <Stack direction="row" spacing={2} justifyContent="end" padding={2}>
         <Button
           variant="outlined"
@@ -217,6 +321,6 @@ export const DateRangePicker = ({ onSubmit, onClose }) => {
           Apply
         </Button>
       </Stack>
-    </Box>
+    </div>
   );
 };
